@@ -1,12 +1,25 @@
 {
-  "version": 2,
-  "builds": [
-    { "src": "server.js", "use": "@vercel/node" }
-  ],
-  "routes": [
-    { "src": "/(.*)", "dest": "/server.js" }
-  ],
-  "env": {
-    "ALLOWED_ORIGIN": "https://prototype-canal-audio.vercel.app"
-  }
-} 
+    "version": 2,
+    "builds": [
+        {
+            "src": "server.js",
+            "use": "@vercel/node"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/server",
+            "dest": "server.js"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/index.html"
+        }
+    ],
+    "functions": {
+        "api/server.js": {
+            "memory": 1024,
+            "maxDuration": 10
+        }
+    }
+}

@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "main": "audio.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "dev": "node server.js",
-    "build": "echo 'No build step required'"
+    "dev": "node api/server.js",
+    "build": "echo 'No build step required'",
+    "start": "node api/server.js"
   },
   "keywords": [],
   "author": "",

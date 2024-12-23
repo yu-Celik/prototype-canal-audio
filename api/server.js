@@ -1,20 +1,19 @@
 const WebSocket = require('ws');
 
 class AudioServer {
-    constructor() {
-        // Initialisation des structures de données avec Map pour une meilleure performance
+    constructor(server) {
+        // Initialisation des structures de données
         this.clients = new Map();
         this.userIds = new Map();
         this.activeParticipants = new Set();
         this.pendingConnections = new Set();
 
-        // Configuration du serveur WebSocket
+        // Configuration du serveur WebSocket pour Vercel
         this.wss = new WebSocket.Server({
-            port: process.env.PORT || 8080,
-            // Configuration CORS pour la sécurité
+            server,
             verifyClient: (info) => {
                 const origin = info.origin || info.req.headers.origin;
-                return origin === process.env.ALLOWED_ORIGIN;
+                return true;
             }
         });
 
@@ -76,10 +75,12 @@ class AudioServer {
 // Export pour Vercel
 module.exports = (req, res) => {
     if (req.headers.upgrade && req.headers.upgrade.toLowerCase() === 'websocket') {
-        // Gestion des connexions WebSocket
-        const audioServer = new AudioServer();
+        const server = require('http').createServer();
+        const audioServer = new AudioServer(server);
+        server.listen(0, () => {
+            console.log('Serveur WebSocket démarré sur Vercel');
+        });
     } else {
-        // Réponse HTTP standard pour les requêtes non-WebSocket
         res.writeHead(200, { 'Content-Type': 'text/plain' });
         res.end('Serveur WebSocket Canal Audio');
     }
