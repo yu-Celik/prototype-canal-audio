@@ -21,7 +21,13 @@
     "routes": [
         {
             "src": "/api/websocket",
-            "dest": "/api/websocket.js"
+            "dest": "/api/websocket.js",
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Headers": "X-Requested-With,content-type,Upgrade,Connection"
+            },
+            "continue": true
         },
         {
             "src": "/(.*)",
