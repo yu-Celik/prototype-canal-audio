@@ -1,37 +1,12 @@
 {
-    "version": 2,
-    "builds": [
-        {
-            "src": "api/websocket.js",
-            "use": "@vercel/node"
-        },
-        {
-            "src": "*.html",
-            "use": "@vercel/static"
-        },
-        {
-            "src": "*.js",
-            "use": "@vercel/static"
-        },
-        {
-            "src": "styles/**",
-            "use": "@vercel/static"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/api/websocket",
-            "dest": "/api/websocket.js",
-            "headers": {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Allow-Headers": "X-Requested-With,content-type,Upgrade,Connection"
-            },
-            "continue": true
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/$1"
-        }
-    ]
-}
+  "version": 2,
+  "builds": [
+    { "src": "server.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/server.js" }
+  ],
+  "env": {
+    "ALLOWED_ORIGIN": "https://prototype-canal-audio.vercel.app"
+  }
+} 

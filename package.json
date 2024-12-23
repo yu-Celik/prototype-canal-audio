@@ -1,21 +1,18 @@
 {
-    "name": "canal-audio-server",
-    "version": "1.0.0",
-    "description": "Serveur de signalisation WebRTC pour le canal audio",
-    "type": "module",
-    "scripts": {
-        "dev": "node api/websocket.js",
-        "build": "echo 'Build step completed'",
-        "start": "node api/websocket.js"
-    },
-    "dependencies": {
-        "dotenv": "^16.3.1",
-        "socket.io": "^4.8.1",
-        "socket.io-client": "^4.8.1",
-        "ws": "^8.14.2"
-    },
-    "devDependencies": {
-        "nodemon": "^3.0.1",
-        "vercel": "^32.3.0"
-    }
+  "name": "prototype-canal-audio",
+  "version": "1.0.0",
+  "main": "audio.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'No build step required'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
 }
