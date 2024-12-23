@@ -68,12 +68,24 @@ class AudioServer {
 const audioServer = new AudioServer();
 
 module.exports = (req, res) => {
-    if (req.headers.upgrade && req.headers.upgrade.toLowerCase() === 'websocket') {
-        audioServer.wss.handleUpgrade(req, req.socket, Buffer.alloc(0), (ws) => {
-            audioServer.wss.emit('connection', ws, req);
-        });
-    } else {
-        res.writeHead(200, { 'Content-Type': 'text/plain' });
-        res.end('Serveur WebSocket Canal Audio');
+    try {
+        if (req.headers.upgrade && req.headers.upgrade.toLowerCase() === 'websocket') {
+            console.log('Tentative de connexion WebSocket');
+            audioServer.wss.handleUpgrade(req, req.socket, Buffer.alloc(0), (ws) => {
+                console.log('Connexion WebSocket établie');
+                audioServer.wss.emit('connection', ws, req);
+            });
+        } else {
+            console.log('Requête HTTP reçue');
+            res.writeHead(200, { 
+                'Content-Type': 'text/plain',
+                'Access-Control-Allow-Origin': '*'
+            });
+            res.end('Serveur WebSocket Canal Audio');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Erreur interne du serveur');
     }
 };
