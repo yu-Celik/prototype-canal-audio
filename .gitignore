@@ -1,0 +1,46 @@
+# Dépendances
+/vendor/
+/node_modules/
+
+# Fichiers de configuration d'environnement
+.env
+.env.local
+.env.*.local
+
+# Fichiers de cache
+*.cache
+
+# Fichiers de logs
+*.log
+/logs/
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Fichiers d'IDE et éditeurs
+/.idea/
+/.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# Fichiers de configuration PHP
+composer.phar
+phpunit.xml
+
+# Fichiers de build
+/build/
+/dist/
+
+# Fichiers de sauvegarde
+*.bak
+*.backup
+*~
+
+# Fichiers de session PHP
+/sessions/
+
+# Fichiers de configuration locaux
+config.local.php 
