@@ -20,8 +20,15 @@
     ],
     "routes": [
         {
-            "src": "/api/ws",
-            "dest": "/api/server.js"
+            "src": "/api/server",
+            "dest": "/api/server.js",
+            "methods": ["GET", "POST", "OPTIONS"],
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type, Authorization",
+                "Access-Control-Allow-Credentials": "true"
+            }
         },
         {
             "src": "/audio.js",

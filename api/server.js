@@ -7,7 +7,7 @@ class AudioServer {
         this.activeParticipants = new Set();
         this.pendingConnections = new Set();
 
-        this.wss = new WebSocket.Server({ 
+        this.wss = new WebSocket.Server({
             noServer: true  // Important pour Vercel
         });
 
@@ -39,7 +39,7 @@ class AudioServer {
     handleMessage(ws, message) {
         try {
             const data = JSON.parse(message);
-            
+
             switch (data.type) {
                 case 'set-user-id':
                     this.handleSetUserId(ws, data.userId);
@@ -70,14 +70,35 @@ const audioServer = new AudioServer();
 module.exports = (req, res) => {
     try {
         if (req.headers.upgrade && req.headers.upgrade.toLowerCase() === 'websocket') {
-            console.log('Tentative de connexion WebSocket');
+            console.log('Tentative de connexion WebSocket', {
+                headers: req.headers,
+                url: req.url
+            });
+
             audioServer.wss.handleUpgrade(req, req.socket, Buffer.alloc(0), (ws) => {
                 console.log('Connexion WebSocket établie');
                 audioServer.wss.emit('connection', ws, req);
             });
         } else {
-            console.log('Requête HTTP reçue');
-            res.writeHead(200, { 
+            console.log('Requête HTTP reçue', {
+                method: req.method,
+                url: req.url,
+                headers: req.headers
+            });
+
+            // Gérer les requêtes OPTIONS pour CORS
+            if (req.method === 'OPTIONS') {
+                res.writeHead(200, {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                    'Access-Control-Allow-Credentials': 'true'
+                });
+                res.end();
+                return;
+            }
+
+            res.writeHead(200, {
                 'Content-Type': 'text/plain',
                 'Access-Control-Allow-Origin': '*'
             });
