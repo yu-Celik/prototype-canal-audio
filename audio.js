@@ -1,3 +1,5 @@
+import config from './config.js';
+
 class AudioChannel {
     constructor() {
         // Configuration de la connexion WebRTC
@@ -70,7 +72,7 @@ class AudioChannel {
         // Initialiser la connexion WebSocket
         this.myUserId = userId;
         this.isConfigured = true;
-        this.ws = new WebSocket(process.env.WEBSOCKET_URL);
+        this.ws = new WebSocket(config.WEBSOCKET_URL);
         this.initializeWebSocket();
 
         this.updateStatus('Configuration terminée. Cliquez sur Démarrer pour activer le micro.');
