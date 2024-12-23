@@ -65,7 +65,6 @@ class AudioServer {
     // ... autres méthodes de gestion (handleSetUserId, handleParticipantReady, etc.)
 }
 
-// Export pour Vercel
 const audioServer = new AudioServer();
 
 module.exports = (req, res) => {
