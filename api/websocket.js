@@ -17,7 +17,7 @@ export default function handler(req, res) {
             });
         });
 
-        // Gestion des connexions
+        // Gaestion des connexions
         wss.on('connection', (ws) => {
             audioServer.handleConnection(ws);
         });
