@@ -70,34 +70,33 @@ const audioServer = new AudioServer();
 module.exports = (req, res) => {
     try {
         if (req.headers.upgrade && req.headers.upgrade.toLowerCase() === 'websocket') {
-            console.log('Tentative de connexion WebSocket', {
-                headers: req.headers,
-                url: req.url
-            });
+            console.log('Tentative de connexion WebSocket');
+            
+            // Vérification des headers WebSocket requis
+            if (!req.headers['sec-websocket-key']) {
+                res.writeHead(400);
+                res.end('Headers WebSocket manquants');
+                return;
+            }
 
             audioServer.wss.handleUpgrade(req, req.socket, Buffer.alloc(0), (ws) => {
                 console.log('Connexion WebSocket établie');
                 audioServer.wss.emit('connection', ws, req);
             });
         } else {
-            console.log('Requête HTTP reçue', {
-                method: req.method,
-                url: req.url,
-                headers: req.headers
-            });
-
             // Gérer les requêtes OPTIONS pour CORS
             if (req.method === 'OPTIONS') {
                 res.writeHead(200, {
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-                    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                    'Access-Control-Allow-Headers': 'Content-Type, Authorization, Upgrade, Connection',
                     'Access-Control-Allow-Credentials': 'true'
                 });
                 res.end();
                 return;
             }
 
+            // Réponse normale pour les requêtes HTTP
             res.writeHead(200, {
                 'Content-Type': 'text/plain',
                 'Access-Control-Allow-Origin': '*'
@@ -106,7 +105,7 @@ module.exports = (req, res) => {
         }
     } catch (error) {
         console.error('Erreur:', error);
-        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.writeHead(500);
         res.end('Erreur interne du serveur');
     }
 };
