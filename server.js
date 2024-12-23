@@ -1,6 +1,6 @@
-const WebSocket = require('ws');
+import WebSocket from 'ws';
 
-class AudioServer {
+export class AudioServer {
     constructor() {
         this.clients = new Map();
         this.userIds = new Map();
@@ -10,20 +10,14 @@ class AudioServer {
         console.log("Serveur de signalisation WebRTC démarré!");
     }
 
-    start(port) {
-        this.wss = new WebSocket.Server({ port });
+    handleConnection(ws) {
+        // Ajouter à la liste des connexions en attente
+        this.pendingConnections.add(ws);
+        console.log("Nouvelle connexion en attente de configuration...");
 
-        this.wss.on('connection', (ws) => {
-            // Ajouter à la liste des connexions en attente
-            this.pendingConnections.add(ws);
-            console.log("Nouvelle connexion en attente de configuration...");
-
-            ws.on('message', (message) => this.handleMessage(ws, message));
-            ws.on('close', () => this.handleClose(ws));
-            ws.on('error', (error) => this.handleError(ws, error));
-        });
-
-        console.log(`Serveur WebSocket démarré sur le port ${port}`);
+        ws.on('message', (message) => this.handleMessage(ws, message));
+        ws.on('close', () => this.handleClose(ws));
+        ws.on('error', (error) => this.handleError(ws, error));
     }
 
     handleMessage(ws, message) {
@@ -43,7 +37,7 @@ class AudioServer {
 
                         // Notification aux autres clients
                         this.clients.forEach((client) => {
-                            if (client !== ws) {
+                            if (client !== ws && client.readyState === WebSocket.OPEN) {
                                 client.send(JSON.stringify({
                                     type: 'nouveau-participant',
                                     userId: fromUserId
@@ -78,7 +72,7 @@ class AudioServer {
                         // Transmission du message au destinataire spécifique
                         if (data.targetUserId) {
                             this.clients.forEach((client) => {
-                                if (this.userIds.get(client) === data.targetUserId) {
+                                if (this.userIds.get(client) === data.targetUserId && client.readyState === WebSocket.OPEN) {
                                     client.send(JSON.stringify(data));
                                 }
                             });
@@ -160,17 +154,4 @@ class AudioServer {
         console.error("Une erreur est survenue:", error);
         ws.close();
     }
-}
-
-// Création et démarrage du serveur
-const server = new AudioServer();
-server.start(8080);
-
-// Gestion des erreurs non capturées
-process.on('uncaughtException', (error) => {
-    console.error('Erreur non capturée:', error);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('Promesse rejetée non gérée:', reason);
-}); 
+} 

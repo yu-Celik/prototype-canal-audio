@@ -44,3 +44,4 @@ phpunit.xml
 
 # Fichiers de configuration locaux
 config.local.php 
+.vercel
