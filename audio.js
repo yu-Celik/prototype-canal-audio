@@ -1,4 +1,5 @@
 import config from './config.js';
+import { io } from "socket.io-client";
 
 class AudioChannel {
     constructor() {
@@ -61,76 +62,35 @@ class AudioChannel {
             return;
         }
 
-        // Désactiver le champ et le bouton
         userIdInput.disabled = true;
         document.getElementById('setUserId').disabled = true;
-
-        // Activer les boutons de contrôle
         document.getElementById('startButton').disabled = false;
         document.getElementById('stopButton').disabled = false;
 
-        // Initialiser la connexion WebSocket
         this.myUserId = userId;
         this.isConfigured = true;
-        this.ws = new WebSocket(config.WEBSOCKET_URL);
-        this.initializeWebSocket();
+        
+        // Initialisation de Socket.IO
+        this.socket = io(config.SOCKET_URL, {
+            path: '/api/websocket',
+            transports: ['websocket', 'polling']
+        });
 
-        this.updateStatus('Configuration terminée. Cliquez sur Démarrer pour activer le micro.');
+        this.initializeSocketIO();
     }
 
-    initializeWebSocket() {
-        this.ws.onopen = () => {
-            this.updateStatus('Connecté au serveur de signalisation');
-            // Envoyer l'ID personnalisé au serveur
-            this.ws.send(JSON.stringify({
-                type: 'set-user-id',
-                userId: this.myUserId
-            }));
-        };
+    initializeSocketIO() {
+        this.socket.on('connect', () => {
+            this.updateStatus('Connecté au serveur');
+            this.socket.emit('set-user-id', this.myUserId);
+        });
 
-        this.ws.onclose = () => {
+        this.socket.on('disconnect', () => {
             this.updateStatus('Déconnecté du serveur');
             this.resetInterface();
-        };
+        });
 
-        this.ws.onmessage = async (event) => {
-            const message = JSON.parse(event.data);
-            switch (message.type) {
-                case 'id-error':
-                    this.updateStatus('Erreur: ' + message.message);
-                    this.resetInterface();
-                    break;
-                case 'id-confirmed':
-                    this.updateStatus('ID confirmé. Prêt à communiquer.');
-                    break;
-                case 'liste-participants':
-                    this.participants = new Set(message.participants);
-                    this.updateParticipantsList();
-                    break;
-                case 'nouveau-participant':
-                    this.participants.add(message.userId);
-                    this.updateParticipantsList();
-                    await this.handleNewParticipant(message.userId);
-                    break;
-                case 'participant-deconnecte':
-                    this.participants.delete(message.userId);
-                    this.updateParticipantsList();
-                    this.handleParticipantDisconnected(message.userId);
-                    break;
-                case 'offer':
-                    await this.handleOffer(message);
-                    break;
-                case 'answer':
-                    await this.handleAnswer(message);
-                    break;
-                case 'ice-candidate':
-                    await this.handleIceCandidate(message);
-                    break;
-                case 'audio-level':
-                    this.updateParticipantMeter(message.userId, message.level);
-                    break;
-            }
-        };
+        // Autres gestionnaires d'événements...
     }
 
     resetInterface() {
