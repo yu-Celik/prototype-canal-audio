@@ -70,7 +70,7 @@ class AudioChannel {
         // Initialiser la connexion WebSocket
         this.myUserId = userId;
         this.isConfigured = true;
-        this.ws = new WebSocket('ws://127.0.0.1:8080');
+        this.ws = new WebSocket('wss://623f1232-f851-462d-b769-1664178651cd-00-2g8r933i0olw0.spock.replit.dev');
         this.initializeWebSocket();
 
         this.updateStatus('Configuration terminée. Cliquez sur Démarrer pour activer le micro.');
@@ -124,6 +124,9 @@ class AudioChannel {
                 case 'ice-candidate':
                     await this.handleIceCandidate(message);
                     break;
+                case 'audio-level':
+                    this.updateParticipantMeter(message.userId, message.level);
+                    break;
             }
         };
     }
@@ -152,7 +155,16 @@ class AudioChannel {
         // Ajout de l'utilisateur actuel
         if (this.myUserId) {
             const myItem = document.createElement('li');
-            myItem.textContent = `${this.myUserId} (vous)`;
+            myItem.id = `participant-${this.myUserId.replace(/[^a-zA-Z0-9]/g, '-')}`;
+            myItem.className = 'participant-item';
+            myItem.setAttribute('aria-label', `${this.myUserId} (vous)`);
+            myItem.innerHTML = `
+                <span class="participant-name">${this.myUserId} (vous)</span>
+                <div class="participant-meter">
+                    <div id="meter-${this.myUserId.replace(/[^a-zA-Z0-9]/g, '-')}" class="participant-meter-bar"></div>
+                    <div id="value-${this.myUserId.replace(/[^a-zA-Z0-9]/g, '-')}" class="participant-meter-value">-∞ dB</div>
+                </div>
+            `;
             listElement.appendChild(myItem);
         }
 
@@ -160,7 +172,16 @@ class AudioChannel {
         this.participants.forEach(userId => {
             if (userId !== this.myUserId) {
                 const item = document.createElement('li');
-                item.textContent = userId;
+                item.id = `participant-${userId.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                item.className = 'participant-item';
+                item.setAttribute('aria-label', userId);
+                item.innerHTML = `
+                    <span class="participant-name">${userId}</span>
+                    <div class="participant-meter">
+                        <div id="meter-${userId.replace(/[^a-zA-Z0-9]/g, '-')}" class="participant-meter-bar"></div>
+                        <div id="value-${userId.replace(/[^a-zA-Z0-9]/g, '-')}" class="participant-meter-value">-∞ dB</div>
+                    </div>
+                `;
                 listElement.appendChild(item);
             }
         });
@@ -199,8 +220,26 @@ class AudioChannel {
         // Réception du flux distant
         peerConnection.ontrack = (event) => {
             const remoteAudio = new Audio();
+            remoteAudio.autoplay = true;
+            remoteAudio.controls = true;
             remoteAudio.srcObject = event.streams[0];
-            remoteAudio.play();
+            
+            remoteAudio.onloadedmetadata = async () => {
+                try {
+                    await remoteAudio.play();
+                    console.log('Lecture audio démarrée');
+                } catch (error) {
+                    console.error('Erreur lors de la lecture audio:', error);
+                    if (error.name === 'NotAllowedError') {
+                        this.updateStatus('Veuillez autoriser la lecture audio');
+                    }
+                }
+            };
+            
+            const audioContainer = document.createElement('div');
+            audioContainer.className = 'remote-audio';
+            audioContainer.appendChild(remoteAudio);
+            document.body.appendChild(audioContainer);
         };
 
         // Création et envoi de l'offre
@@ -237,8 +276,26 @@ class AudioChannel {
 
         peerConnection.ontrack = (event) => {
             const remoteAudio = new Audio();
+            remoteAudio.autoplay = true;
+            remoteAudio.controls = true;
             remoteAudio.srcObject = event.streams[0];
-            remoteAudio.play();
+            
+            remoteAudio.onloadedmetadata = async () => {
+                try {
+                    await remoteAudio.play();
+                    console.log('Lecture audio démarrée');
+                } catch (error) {
+                    console.error('Erreur lors de la lecture audio:', error);
+                    if (error.name === 'NotAllowedError') {
+                        this.updateStatus('Veuillez autoriser la lecture audio');
+                    }
+                }
+            };
+            
+            const audioContainer = document.createElement('div');
+            audioContainer.className = 'remote-audio';
+            audioContainer.appendChild(remoteAudio);
+            document.body.appendChild(audioContainer);
         };
 
         // Traitement de l'offre
@@ -344,6 +401,14 @@ class AudioChannel {
             // Affichage de la valeur en dB
             meterValue.textContent = db === -Infinity ? '-∞ dB' : `${db.toFixed(1)} dB`;
 
+            // Envoi du niveau audio au serveur
+            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                this.ws.send(JSON.stringify({
+                    type: 'audio-level',
+                    level: average / 255, // Normalisation entre 0 et 1
+                }));
+            }
+
             // Animation
             this.animationFrame = requestAnimationFrame(updateMeter);
         };
@@ -391,6 +456,34 @@ class AudioChannel {
     updateStatus(message) {
         const statusElement = document.getElementById('status');
         statusElement.textContent = `État: ${message}`;
+    }
+
+    updateParticipantMeter(userId, audioLevel) {
+        const meterId = `meter-${userId.replace(/[^a-zA-Z0-9]/g, '-')}`;
+        const valueId = `value-${userId.replace(/[^a-zA-Z0-9]/g, '-')}`;
+        const participantId = `participant-${userId.replace(/[^a-zA-Z0-9]/g, '-')}`;
+        
+        const meterBar = document.getElementById(meterId);
+        const meterValue = document.getElementById(valueId);
+        const participantItem = document.getElementById(participantId);
+        
+        if (meterBar && meterValue && participantItem) {
+            const width = Math.max(0, Math.min(100, audioLevel * 100));
+            meterBar.style.width = `${width}%`;
+            
+            const db = audioLevel === 0 ? -Infinity : 20 * Math.log10(audioLevel);
+            meterValue.textContent = db === -Infinity ? '-∞ dB' : `${db.toFixed(1)} dB`;
+
+            // Mise en surbrillance si le niveau audio dépasse un seuil
+            const SPEAKING_THRESHOLD = -50; // Seuil en dB
+            if (db > SPEAKING_THRESHOLD) {
+                participantItem.classList.add('participant-speaking');
+                participantItem.setAttribute('aria-label', `${userId} (en train de parler)`);
+            } else {
+                participantItem.classList.remove('participant-speaking');
+                participantItem.setAttribute('aria-label', userId);
+            }
+        }
     }
 }
 

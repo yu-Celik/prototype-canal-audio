@@ -1,194 +1,21 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Canal Audio WebRTC</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .user-setup {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #f8f9fa;
-        }
-
-        .user-setup input {
-            padding: 8px;
-            margin-right: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-
-        #startButton {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        #startButton:hover:not(:disabled) {
-            background-color: #45a049;
-        }
-
-        #stopButton {
-            background-color: #f44336;
-            color: white;
-        }
-
-        #stopButton:hover:not(:disabled) {
-            background-color: #da190b;
-        }
-
-        #status {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 4px;
-            background-color: #e8f5e9;
-        }
-
-        .participants {
-            margin-top: 20px;
-        }
-
-        /* Styles pour l'accessibilité */
-        button:focus, input:focus {
-            outline: 3px solid #2196F3;
-            outline-offset: 2px;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            button {
-                transition: none;
-            }
-        }
-
-        /* Support du mode sombre */
-        @media (prefers-color-scheme: dark) {
-            body {
-                background-color: #1a1a1a;
-                color: #ffffff;
-            }
-
-            .container {
-                background-color: #2d2d2d;
-            }
-
-            .user-setup {
-                background-color: #333333;
-                border-color: #444444;
-            }
-
-            .user-setup input {
-                background-color: #2d2d2d;
-                color: white;
-                border-color: #444444;
-            }
-
-            #status {
-                background-color: #1b5e20;
-                color: white;
-            }
-        }
-
-        .audio-meter {
-            margin: 20px 0;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #f8f9fa;
-        }
-
-        .meter-container {
-            width: 100%;
-            height: 20px;
-            background-color: #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .meter-label {
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        .meter-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #4CAF50 0%, #FFC107 70%, #F44336 100%);
-            transition: width 0.1s ease;
-            border-radius: 10px;
-        }
-
-        .meter-value {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 12px;
-            color: #333;
-        }
-
-        /* Support du mode sombre pour le VU-mètre */
-        @media (prefers-color-scheme: dark) {
-            .audio-meter {
-                background-color: #333333;
-                border-color: #444444;
-            }
-
-            .meter-container {
-                background-color: #1a1a1a;
-            }
-
-            .meter-value {
-                color: #ffffff;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles/meters.css">
 </head>
+
 <body>
     <div class="container" role="main">
         <h1>Canal Audio WebRTC</h1>
-        
+
         <div class="user-setup" role="form" aria-label="Configuration utilisateur">
             <label for="userId">Votre identifiant :</label>
-            <input type="text" id="userId" name="userId" placeholder="Entrez votre identifiant" 
-                   aria-label="Entrez votre identifiant" required>
+            <input type="text" id="userId" name="userId" placeholder="Entrez votre identifiant"
+                aria-label="Entrez votre identifiant" required>
             <button id="setUserId" aria-label="Valider l'identifiant">
                 Valider
             </button>
@@ -217,10 +44,13 @@
 
         <div class="participants" role="region" aria-label="Liste des participants">
             <h2>Participants connectés</h2>
-            <ul id="participantsList" aria-live="polite"></ul>
+            <ul id="participantsList" aria-live="polite" class="participants-list">
+                <!-- Les participants seront ajoutés dynamiquement ici -->
+            </ul>
         </div>
     </div>
 
-    <script src="audio.js"></script>
+    <script src="audio.js?v=1"></script>
 </body>
-</html> 
+
+</html>
