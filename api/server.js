@@ -1,20 +1,14 @@
 const WebSocket = require('ws');
 
 class AudioServer {
-    constructor(server) {
-        // Initialisation des structures de données
+    constructor() {
         this.clients = new Map();
         this.userIds = new Map();
         this.activeParticipants = new Set();
         this.pendingConnections = new Set();
 
-        // Configuration du serveur WebSocket pour Vercel
-        this.wss = new WebSocket.Server({
-            server,
-            verifyClient: (info) => {
-                const origin = info.origin || info.req.headers.origin;
-                return true;
-            }
+        this.wss = new WebSocket.Server({ 
+            noServer: true  // Important pour Vercel
         });
 
         this.initializeWebSocketServer();
@@ -23,7 +17,6 @@ class AudioServer {
 
     initializeWebSocketServer() {
         this.wss.on('connection', (ws) => {
-            // Gestion des connexions avec support de reconnexion automatique
             this.handleConnection(ws);
         });
     }
@@ -73,12 +66,12 @@ class AudioServer {
 }
 
 // Export pour Vercel
+const audioServer = new AudioServer();
+
 module.exports = (req, res) => {
     if (req.headers.upgrade && req.headers.upgrade.toLowerCase() === 'websocket') {
-        const server = require('http').createServer();
-        const audioServer = new AudioServer(server);
-        server.listen(0, () => {
-            console.log('Serveur WebSocket démarré sur Vercel');
+        audioServer.wss.handleUpgrade(req, req.socket, Buffer.alloc(0), (ws) => {
+            audioServer.wss.emit('connection', ws, req);
         });
     } else {
         res.writeHead(200, { 'Content-Type': 'text/plain' });
