@@ -43,6 +43,7 @@ export class UIManager {
             listElement.appendChild(myItem);
         }
 
+        console.trace('participants', this.audioChannel.participants);
         // Ajout des autres participants
         if (this.audioChannel.participants) {
             this.audioChannel.participants.forEach(userId => {

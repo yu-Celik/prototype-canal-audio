@@ -73,7 +73,7 @@ export class WebSocketManager {
                     break;
                 case 'ice-candidate':
                     console.trace('je suis ice candidate');
-                    await this.webRTCManager.handleIceCandidate(message);
+                    await this.WhandleIceCandidate(message);
                     break;
                 case 'audio-level':
                     console.trace('je suis audio level');
