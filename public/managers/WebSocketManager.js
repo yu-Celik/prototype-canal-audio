@@ -3,14 +3,16 @@ export class WebSocketManager {
     constructor(audioChannel) {
         this.audioChannel = audioChannel;
         this.uiManager = audioChannel.uiManager;
-        this.webRTCManager = audioChannel.webRTCManager;
+    }
+
+    setWebRTCManager(webRTCManager) {
+        this.webRTCManager = webRTCManager;
     }
 
     initialize() {
         this.ws = new WebSocket('wss://prototype-canal-audio.onrender.com');
         this.initializeWebSocket();
     }
-
     
     initializeWebSocket() {
         this.ws.onopen = () => {
@@ -22,7 +24,6 @@ export class WebSocketManager {
             }));
         };
 
-    console.log('je suis ici');
 
 
         this.ws.onclose = () => {
@@ -30,11 +31,9 @@ export class WebSocketManager {
             this.uiManager.resetInterface();
         };
 
-        console.log('je suis ici 1');
 
         this.ws.onmessage = async (event) => {
             const message = JSON.parse(event.data);
-            console.log('je suis ici 2');
             
             switch (message.type) {
                 case 'id-error':
@@ -73,7 +72,7 @@ export class WebSocketManager {
                     break;
                 case 'ice-candidate':
                     console.trace('je suis ice candidate');
-                    await this.WhandleIceCandidate(message);
+                    await this.webRTCManager.handleIceCandidate(message);
                     break;
                 case 'audio-level':
                     console.trace('je suis audio level');

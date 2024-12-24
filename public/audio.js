@@ -24,8 +24,11 @@ class AudioChannel {
         this.isConfigured = false;
 
         // Initialisation des managers
-        this.webRTCManager = new WebRTCManager(this);
         this.webSocketManager = new WebSocketManager(this);
+        this.webRTCManager = new WebRTCManager(this);
+
+        this.webSocketManager.setWebRTCManager(this.webRTCManager);
+        this.webRTCManager.setWebSocketManager(this.webSocketManager);
 
         // Analyse audio
         this.audioContext = null;

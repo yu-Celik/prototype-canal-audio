@@ -1,8 +1,14 @@
 export class WebRTCManager {
     constructor(audioChannel) {
         this.audioChannel = audioChannel;
+        this.uiManager = audioChannel.uiManager;
+        this.webSocketManager = this.audioChannel.webSocketManager;
     }
 
+    setWebSocketManager(webSocketManager) {
+        this.webSocketManager = webSocketManager;
+    }
+    
     async handleNewParticipant(userId) {
         const peerConnection = new RTCPeerConnection(this.audioChannel.configuration);
         this.audioChannel.peerConnections.set(userId, peerConnection);
@@ -53,6 +59,9 @@ export class WebRTCManager {
         // Création et envoi de l'offre
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
+
+        console.log('this.webSocketManager', this.webSocketManager);
+        
         this.webSocketManager.ws.send(JSON.stringify({
             type: 'offer',
             offer: offer,
