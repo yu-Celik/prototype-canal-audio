@@ -1,18 +1,40 @@
+const express = require('express');
+const http = require('http');
 const WebSocket = require('ws');
+const path = require('path');
 
 class AudioServer {
     constructor() {
+        // Initialiser Express
+        this.app = express();
+        
+        // Servir les fichiers statiques
+        this.app.use(express.static(path.join(__dirname, 'public')));
+        
+        // Créer le serveur HTTP
+        this.server = http.createServer(this.app);
+        
+        // Initialiser le serveur WebSocket avec le serveur HTTP
+        this.wss = new WebSocket.Server({ server: this.server });
+        
+        // Configuration des collections
         this.clients = new Map();
         this.userIds = new Map();
         this.activeParticipants = new Set();
         this.pendingConnections = new Set();
-
-        // Initialiser le serveur WebSocket
-        const port = process.env.PORT || 8080;
-        this.wss = new WebSocket.Server({ port });
-
-        console.log(`Serveur de signalisation WebRTC démarré sur le port ${port}!`);
-
+        
+        // Route par défaut
+        this.app.get('/', (req, res) => {
+            res.sendFile(path.join(__dirname, 'public', 'index.html'));
+        });
+        
+        // Démarrer le serveur
+        const port = process.env.PORT || 3000;
+        this.server.listen(port, () => {
+            console.log(`Serveur démarré sur le port ${port}`);
+        });
+        
+        // Gérer les connexions WebSocket
         this.wss.on('connection', this.handleConnection.bind(this));
     }
 
