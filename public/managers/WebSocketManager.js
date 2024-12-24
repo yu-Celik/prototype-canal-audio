@@ -18,7 +18,7 @@ export class WebSocketManager {
             // Envoyer l'ID personnalisé au serveur
             this.ws.send(JSON.stringify({
                 type: 'set-user-id',
-                userId: this.myUserId
+                userId: this.audioChannel.myUserId
             }));
         };
 
@@ -73,7 +73,7 @@ export class WebSocketManager {
                     break;
                 case 'ice-candidate':
                     console.trace('je suis ice candidate');
-                    await this.handleIceCandidate(message);
+                    await this.webRTCManager.handleIceCandidate(message);
                     break;
                 case 'audio-level':
                     console.trace('je suis audio level');

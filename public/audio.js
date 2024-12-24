@@ -149,8 +149,8 @@ class AudioChannel {
             meterValue.textContent = db === -Infinity ? '-∞ dB' : `${db.toFixed(1)} dB`;
 
             // Envoi du niveau audio au serveur
-            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-                this.ws.send(JSON.stringify({
+            if (this.webSocketManager.ws && this.webSocketManager.ws.readyState === WebSocket.OPEN) {
+                this.webSocketManager.ws.send(JSON.stringify({
                     type: 'audio-level',
                     level: average / 255, // Normalisation entre 0 et 1
                 }));

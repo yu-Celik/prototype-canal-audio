@@ -44,8 +44,8 @@ export class UIManager {
         }
 
         // Ajout des autres participants
-        if (this.participants) {
-            this.participants.forEach(userId => {
+        if (this.audioChannel.participants) {
+            this.audioChannel.participants.forEach(userId => {
                 if (userId !== this.audioChannel.myUserId) {
                     const item = document.createElement('li');
                     item.id = `participant-${userId.replace(/[^a-zA-Z0-9]/g, '-')}`;
@@ -112,7 +112,7 @@ export class UIManager {
 
         // Réinitialiser les connexions
         this.audioChannel.stopAudioChannel();
-        this.isConfigured = false;
-        this.myUserId = null;
+        this.audioChannel.isConfigured = false;
+        this.audioChannel.myUserId = null;
     }
 } 

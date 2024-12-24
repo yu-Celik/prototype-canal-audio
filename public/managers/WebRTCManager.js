@@ -8,9 +8,9 @@ export class WebRTCManager {
         this.peerConnections.set(userId, peerConnection);
 
         // Ajout du flux local
-        if (this.localStream) {
-            this.localStream.getTracks().forEach(track => {
-                peerConnection.addTrack(track, this.localStream);
+        if (this.audioChannel.localStream) {
+            this.audioChannel.localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, this.audioChannel.localStream);
             });
         }
 
@@ -61,13 +61,13 @@ export class WebRTCManager {
     }
 
     async handleOffer(message) {
-        const peerConnection = new RTCPeerConnection(this.configuration);
-        this.peerConnections.set(message.userId, peerConnection);
+        const peerConnection = new RTCPeerConnection(this.audioChannel.configuration);
+        this.audioChannel.peerConnections.set(message.userId, peerConnection);
 
         // Ajout du flux local
-        if (this.localStream) {
-            this.localStream.getTracks().forEach(track => {
-                peerConnection.addTrack(track, this.localStream);
+        if (this.audioChannel.localStream) {
+            this.audioChannel.localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, this.audioChannel.localStream);
             });
         }
 
@@ -119,24 +119,24 @@ export class WebRTCManager {
     }
 
     async handleAnswer(message) {
-        const peerConnection = this.peerConnections.get(message.userId);
+        const peerConnection = this.audioChannel.peerConnections.get(message.userId);
         if (peerConnection) {
             await peerConnection.setRemoteDescription(new RTCSessionDescription(message.answer));
         }
     }
 
     async handleIceCandidate(message) {
-        const peerConnection = this.peerConnections.get(message.userId);
+        const peerConnection = this.audioChannel.peerConnections.get(message.userId);
         if (peerConnection) {
             await peerConnection.addIceCandidate(new RTCIceCandidate(message.candidate));
         }
     }
 
     handleParticipantDisconnected(userId) {
-        const peerConnection = this.peerConnections.get(userId);
+        const peerConnection = this.audioChannel.peerConnections.get(userId);
         if (peerConnection) {
             peerConnection.close();
-            this.peerConnections.delete(userId);
+            this.audioChannel.peerConnections.delete(userId);
         }
     }
 } 
