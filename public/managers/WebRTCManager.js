@@ -4,8 +4,8 @@ export class WebRTCManager {
     }
 
     async handleNewParticipant(userId) {
-        const peerConnection = new RTCPeerConnection(this.configuration);
-        this.peerConnections.set(userId, peerConnection);
+        const peerConnection = new RTCPeerConnection(this.audioChannel.configuration);
+        this.audioChannel.peerConnections.set(userId, peerConnection);
 
         // Ajout du flux local
         if (this.audioChannel.localStream) {

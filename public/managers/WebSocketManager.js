@@ -7,7 +7,7 @@ export class WebSocketManager {
     }
 
     initialize() {
-        this.ws = new WebSocket('wss://prototype-canal-audio.onrender.com');
+        this.ws = new WebSocket('wss://623f1232-f851-462d-b769-1664178651cd-00-2g8r933i0olw0.spock.replit.dev/');
         this.initializeWebSocket();
     }
 
@@ -48,18 +48,18 @@ export class WebSocketManager {
                     break;
                 case 'liste-participants':
                     console.trace('je suis liste participants');
-                    this.participants = new Set(message.participants);
+                    this.audioChannel.participants = new Set(message.participants);
                     this.uiManager.updateParticipantsList();
                     break;
                 case 'nouveau-participant':
                     console.trace('je suis nouveau participant');
-                    this.participants.add(message.userId);
+                    this.audioChannel.participants.add(message.userId);
                     this.uiManager.updateParticipantsList();
                     await this.webRTCManager.handleNewParticipant(message.userId);
                     break;
                 case 'participant-deconnecte':
                     console.trace('je suis participant deconnecte');
-                    this.participants.delete(message.userId);
+                    this.audioChannel.participants.delete(message.userId);
                     this.uiManager.updateParticipantsList();
                     this.webRTCManager.handleParticipantDisconnected(message.userId);
                     break;
