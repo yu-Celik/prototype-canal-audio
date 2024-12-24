@@ -2,16 +2,14 @@
   "name": "prototype-canal-audio",
   "version": "1.0.0",
   "main": "audio.js",
-  "scripts": {
-    "dev": "node api/server.js",
-    "build": "echo 'No build step required'",
-    "start": "node api/server.js"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "ws": "^8.18.0"
+  },
+  "scripts": {
+    "start": "node server.js"
   }
 }

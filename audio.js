@@ -67,10 +67,10 @@ class AudioChannel {
         document.getElementById('startButton').disabled = false;
         document.getElementById('stopButton').disabled = false;
 
-        // Initialiser la connexion WebSocket avec l'URL de production
+        // Initialiser la connexion WebSocket
         this.myUserId = userId;
         this.isConfigured = true;
-        this.ws = new WebSocket('wss://prototype-canal-audio.vercel.app/api/server');
+        this.ws = new WebSocket('wss://623f1232-f851-462d-b769-1664178651cd-00-2g8r933i0olw0.spock.replit.dev');
         this.initializeWebSocket();
 
         this.updateStatus('Configuration terminée. Cliquez sur Démarrer pour activer le micro.');
