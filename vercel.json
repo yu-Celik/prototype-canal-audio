@@ -26,7 +26,7 @@
             "headers": {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type, Authorization, Upgrade, Connection",
+                "Access-Control-Allow-Headers": "Content-Type, Authorization, Upgrade, Connection, Sec-WebSocket-Key, Sec-WebSocket-Version",
                 "Access-Control-Allow-Credentials": "true",
                 "Access-Control-Max-Age": "86400"
             }

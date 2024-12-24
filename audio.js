@@ -67,13 +67,33 @@ class AudioChannel {
         document.getElementById('startButton').disabled = false;
         document.getElementById('stopButton').disabled = false;
 
-        // Initialiser la connexion WebSocket avec l'URL de production
+        // Initialiser la connexion WebSocket
         this.myUserId = userId;
         this.isConfigured = true;
-        this.ws = new WebSocket('wss://prototype-canal-audio.vercel.app/api/server');
-        this.initializeWebSocket();
+        
+        // Ajout de la gestion d'erreur et reconnexion
+        try {
+            this.ws = new WebSocket('wss://prototype-canal-audio.vercel.app/api/server');
+            
+            this.ws.onerror = (error) => {
+                console.error('Erreur WebSocket:', error);
+                this.updateStatus('Erreur de connexion au serveur');
+                this.reconnectWebSocket();
+            };
 
-        this.updateStatus('Configuration terminée. Cliquez sur Démarrer pour activer le micro.');
+            this.initializeWebSocket();
+        } catch (error) {
+            console.error('Erreur de création WebSocket:', error);
+            this.updateStatus('Erreur de connexion au serveur');
+            this.reconnectWebSocket();
+        }
+    }
+
+    reconnectWebSocket() {
+        setTimeout(() => {
+            this.updateStatus('Tentative de reconnexion...');
+            this.setupUserId();
+        }, 5000);
     }
 
     initializeWebSocket() {
