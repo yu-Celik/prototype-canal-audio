@@ -7,7 +7,7 @@ export class WebSocketManager {
     }
 
     initialize() {
-        this.ws = new WebSocket('wss://623f1232-f851-462d-b769-1664178651cd-00-2g8r933i0olw0.spock.replit.dev/');
+        this.ws = new WebSocket('wss://prototype-canal-audio.onrender.com');
         this.initializeWebSocket();
     }
 
