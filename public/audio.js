@@ -1,6 +1,6 @@
-import { UIManager } from './UIManager.js';
-import { WebRTCManager } from './WebRTCManager.js';
-import { WebSocketManager } from './WebSocketManager.js';
+import { UIManager } from './managers/UIManager.js';
+import { WebRTCManager } from './managers/WebRTCManager.js';
+import { WebSocketManager } from './managers/WebSocketManager.js';
 
 class AudioChannel {
     constructor() {
