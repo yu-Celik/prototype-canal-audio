@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Canal Audio WebRTC</title>
     <link rel="stylesheet" href="styles/meters.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 
 <body>
@@ -16,17 +17,24 @@
             <label for="userId">Votre identifiant :</label>
             <input type="text" id="userId" name="userId" placeholder="Entrez votre identifiant"
                 aria-label="Entrez votre identifiant" required>
-            <button id="setUserId" aria-label="Valider l'identifiant">
-                Valider
+            <button id="setUserId" aria-label="Valider l'identifiant" class="control-button">
+                <i class="fas fa-check"></i>
+                <span class="button-text">Valider</span>
             </button>
         </div>
 
         <div class="controls" role="group" aria-label="Contrôles audio">
-            <button id="startButton" aria-label="Démarrer/Couper le micro" disabled>
-                Démarrer
+            <button id="startButton" class="control-button" aria-label="Démarrer/Couper le micro" disabled>
+                <i class="fas fa-microphone"></i>
+                <span class="button-text">Démarrer</span>
             </button>
-            <button id="stopButton" aria-label="Arrêter la communication" disabled>
-                Arrêter
+            <button id="muteButton" class="control-button" aria-label="Couper/Activer le son" disabled>
+                <i class="fas fa-volume-up"></i>
+                <span class="button-text">Son</span>
+            </button>
+            <button id="stopButton" class="control-button" aria-label="Quitter la conversation" disabled>
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="button-text">Quitter</span>
             </button>
         </div>
 

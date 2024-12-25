@@ -31,17 +31,26 @@ body {
 
         .controls {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             margin: 20px 0;
         }
 
-        button {
+        .control-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             padding: 10px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .control-button i {
+            font-size: 18px;
         }
 
         button:disabled {
@@ -58,13 +67,38 @@ body {
             background-color: #45a049;
         }
 
+        #startButton.muted {
+            background-color: #ff5722;
+        }
+
+        #startButton.muted i::before {
+            content: "\f131"; /* Icône micro coupé */
+        }
+
+        #muteButton {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        #muteButton:hover:not(:disabled) {
+            background-color: #1976D2;
+        }
+
+        #muteButton.muted {
+            background-color: #607D8B;
+        }
+
+        #muteButton.muted i::before {
+            content: "\f6a9"; /* Icône volume coupé */
+        }
+
         #stopButton {
             background-color: #f44336;
             color: white;
         }
 
         #stopButton:hover:not(:disabled) {
-            background-color: #da190b;
+            background-color: #d32f2f;
         }
 
         #status {
@@ -247,5 +281,39 @@ body {
             
             .participant-meter-value {
                 color: #ffffff;
+            }
+        }
+
+        /* Support du mode sombre */
+        @media (prefers-color-scheme: dark) {
+            .control-button {
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .control-button:disabled {
+                background-color: #424242;
+                color: #666;
+            }
+        }
+
+        /* Animation pour les transitions d'état */
+        .control-button i {
+            transition: transform 0.2s ease;
+        }
+
+        .control-button:active:not(:disabled) i {
+            transform: scale(0.9);
+        }
+
+        /* Styles pour l'accessibilité */
+        .control-button:focus {
+            outline: 3px solid #2196F3;
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .control-button,
+            .control-button i {
+                transition: none;
             }
         }

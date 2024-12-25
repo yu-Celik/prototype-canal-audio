@@ -52,12 +52,12 @@ class AudioChannel {
 
     initializeControls() {
         // Gestion de l'ID utilisateur
-        document.getElementById('setUserId').addEventListener('click', () => {
+        this.uiManager.elements.setUserId.addEventListener('click', () => {
             this.setupUserId();
         });
 
         // Gestion de la touche Entrée dans le champ ID
-        document.getElementById('userId').addEventListener('keypress', (event) => {
+        this.uiManager.elements.userId.addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
                 event.preventDefault();
                 this.setupUserId();
@@ -65,11 +65,11 @@ class AudioChannel {
         });
 
         // Contrôles audio
-        document.getElementById('startButton').addEventListener('click', () => {
+        this.uiManager.elements.startButton.addEventListener('click', () => {
             this.toggleAudioChannel();
         });
 
-        document.getElementById('stopButton').addEventListener('click', () => {
+        this.uiManager.elements.stopButton.addEventListener('click', () => {
             this.stopAudioChannel();
         });
     }
@@ -95,7 +95,6 @@ class AudioChannel {
                     type: 'participant-pret'
                 }));
 
-                document.getElementById('startButton').textContent = 'Couper le micro';
                 this.startAudioMeter();
             } catch (error) {
                 console.error('Erreur lors de l\'accès au microphone:', error);
@@ -103,13 +102,6 @@ class AudioChannel {
                 return;
             }
         }
-
-        this.isMuted = !this.isMuted;
-        this.localStream.getAudioTracks().forEach(track => {
-            track.enabled = !this.isMuted;
-        });
-        document.getElementById('startButton').textContent = this.isMuted ? 'Activer le micro' : 'Couper le micro';
-        this.uiManager.updateStatus(this.isMuted ? 'Micro désactivé' : 'Micro activé');
     }
 
     setupAudioAnalyser() {
@@ -141,8 +133,8 @@ class AudioChannel {
             const db = average === 0 ? -Infinity : 20 * Math.log10(average / 255);
 
             // Mise à jour de l'interface
-            const meterBar = document.getElementById('meter-bar');
-            const meterValue = document.getElementById('meter-value');
+            const meterBar = this.uiManager.elements.meterBar;
+            const meterValue = this.uiManager.elements.meterValue;
 
             // Calcul de la largeur de la barre (0-100%)
             const width = Math.max(0, Math.min(100, (average / 255) * 100));
@@ -180,8 +172,8 @@ class AudioChannel {
         }
 
         // Réinitialisation de l'affichage
-        const meterBar = document.getElementById('meter-bar');
-        const meterValue = document.getElementById('meter-value');
+        const meterBar = this.uiManager.elements.meterBar;
+        const meterValue = this.uiManager.elements.meterValue;
         if (meterBar) meterBar.style.width = '0%';
         if (meterValue) meterValue.textContent = '-∞ dB';
     }
@@ -207,8 +199,24 @@ class AudioChannel {
         }
 
         // Mettre à jour l'interface
-        document.getElementById('startButton').textContent = 'Démarrer';
+        this.uiManager.elements.startButton.textContent = 'Démarrer';
         this.uiManager.updateStatus('Canal audio arrêté');
+    }
+
+    toggleMicrophone(isMuted) {
+        if (this.localStream) {
+            this.localStream.getAudioTracks().forEach(track => {
+                track.enabled = !isMuted;
+            });
+        }
+    }
+
+    toggleAudio(isMuted) {
+        // Récupérer tous les éléments audio distants
+        const remoteAudios = document.querySelectorAll('.remote-audio audio');
+        remoteAudios.forEach(audio => {
+            audio.muted = isMuted;
+        });
     }
 }
 
