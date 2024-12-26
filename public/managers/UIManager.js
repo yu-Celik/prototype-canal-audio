@@ -1,8 +1,6 @@
 export class UIManager {
     constructor(audioChannel) {
         this.audioChannel = audioChannel;
-        this.isMicMuted = false;
-        this.isAudioMuted = false;
         this.elements = this.initializeElements();
         this.initializeControlButtons();
     }
@@ -16,8 +14,6 @@ export class UIManager {
             stopButton: document.getElementById('stopButton'),
             participantsList: document.getElementById('participantsList'),
             status: document.getElementById('status'),
-            meterBar: document.getElementById('meter-bar'),
-            meterValue: document.getElementById('meter-value')
         };
     }
 
@@ -61,22 +57,19 @@ export class UIManager {
 
     toggleAudio() {
         const muteButton = this.elements.muteButton;
-        this.isAudioMuted = !this.isAudioMuted;
+        this.audioChannel.isAudioMuted = !this.audioChannel.isAudioMuted;
 
         // Mise à jour de l'interface
-        muteButton.classList.toggle('muted', this.isAudioMuted);
-        muteButton.querySelector('i').className = this.isAudioMuted
-            ? 'fas fa-volume-mute'
-            : 'fas fa-volume-up';
-        muteButton.querySelector('.button-text').textContent = this.isAudioMuted
-            ? 'Son coupé'
-            : 'Son actif';
+        muteButton.classList.toggle('muted', this.audioChannel.isAudioMuted);
+        muteButton.querySelector('i').className = this.audioChannel.isAudioMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+        muteButton.setAttribute('data-tooltip', this.audioChannel.isAudioMuted ? 'Son coupé' : 'Son actif');
+        muteButton.setAttribute('aria-label', this.audioChannel.isAudioMuted ? 'Son coupé' : 'Son actif');
 
         // Notification du changement d'état
-        this.updateStatus(this.isAudioMuted ? 'Son désactivé' : 'Son activé');
+        this.updateStatus(this.audioChannel.isAudioMuted ? 'Son désactivé' : 'Son activé');
 
         // Appel à la méthode de l'AudioChannel pour couper/activer le son
-        this.audioChannel.toggleAudio(this.isAudioMuted);
+        this.audioChannel.toggleAudio();
     }
 
     leaveConversation() {
@@ -161,27 +154,30 @@ export class UIManager {
     // Gestion des contrôles audio
     toggleMicrophone() {
         if (!this.elements.startButton) return;
-
-        this.isMicMuted = !this.isMicMuted;
+        this.audioChannel.isMicMuted = !this.audioChannel.isMicMuted;
         this.updateMicrophoneUI();
-        this.audioChannel.toggleMicrophone(this.isMicMuted);
+        this.audioChannel.toggleMicrophone();
     }
 
     updateMicrophoneUI() {
         const { startButton } = this.elements;
-        startButton.classList.toggle('muted', this.isMicMuted);
+        const toggle = !this.audioChannel.isMicMuted;
+
+        startButton.classList.toggle('muted', toggle);
 
         const iconElement = startButton.querySelector('i');
-        const textElement = startButton.querySelector('.button-text');
+        const dataTooltip = startButton.getAttribute('data-tooltip');
 
         if (iconElement) {
-            iconElement.className = this.isMicMuted ? 'fas fa-microphone-slash' : 'fas fa-microphone';
+            iconElement.className = toggle ? 'fas fa-microphone-slash' : 'fas fa-microphone';
         }
-        if (textElement) {
-            textElement.textContent = this.isMicMuted ? 'Micro coupé' : 'Micro actif';
+        if (dataTooltip) {
+            console.log("dataTooltip", dataTooltip);
+            startButton.setAttribute('data-tooltip', toggle ? 'Micro coupé' : 'Micro actif');
+            startButton.setAttribute('aria-label', toggle ? 'Micro coupé' : 'Micro actif');
         }
 
-        this.updateStatus(this.isMicMuted ? 'Microphone désactivé' : 'Microphone activé');
+        this.updateStatus(toggle ? 'Microphone désactivé' : 'Microphone activé');
     }
 
     updateParticipantMeter(userId, audioLevel) {
@@ -198,7 +194,7 @@ export class UIManager {
         meterValue.textContent = db === -Infinity ? '-∞ dB' : `${db.toFixed(1)} dB`;
 
         // Mise en surbrillance si le niveau audio dépasse un seuil
-        const SPEAKING_THRESHOLD = -50; // Seuil en dB
+        const SPEAKING_THRESHOLD = -50;
         container.classList.toggle('participant-speaking', db > SPEAKING_THRESHOLD);
         container.setAttribute('aria-label',
             `${userId}${db > SPEAKING_THRESHOLD ? ' (en train de parler)' : ''}`);
@@ -217,8 +213,8 @@ export class UIManager {
 
     resetInterface() {
         // Réinitialisation des états
-        this.isMicMuted = false;
-        this.isAudioMuted = false;
+        this.audioChannel.isMicMuted = false;
+        this.audioChannel.isAudioMuted = false;
 
         // Supprimer uniquement l'utilisateur actuel de la liste
         if (this.audioChannel.myUserId) {
@@ -232,4 +228,59 @@ export class UIManager {
         this.audioChannel.isConfigured = false;
         this.audioChannel.myUserId = null;
     }
+
+    resetControls() {
+        const { userId, setUserId, startButton, muteButton, stopButton } = this.elements;
+
+        // Réinitialisation du formulaire d'identifiant
+        if (userId) {
+            userId.disabled = false;
+            userId.value = '';
+            userId.setAttribute('aria-invalid', 'false');
+            // Rétablir le focus sur le champ d'identifiant
+            userId.focus();
+        }
+
+        if (setUserId) {
+            setUserId.disabled = false;
+            setUserId.setAttribute('aria-pressed', 'false');
+        }
+
+        // Réinitialisation des boutons de contrôle
+        if (startButton) {
+            startButton.disabled = true;
+            startButton.classList.remove('muted');
+            startButton.setAttribute('aria-pressed', 'false');
+            startButton.setAttribute('aria-label', 'Démarrer le microphone');
+            const startIcon = startButton.querySelector('i');
+            const startText = startButton.querySelector('.button-text');
+
+            console.log('startIcon', startIcon);
+            console.log('startText', startText);
+
+
+            if (startIcon) startIcon.className = 'fas fa-microphone';
+            if (startText) startText.textContent = 'Démarrer';
+        }
+
+        if (muteButton) {
+            muteButton.disabled = true;
+            muteButton.classList.remove('muted');
+            muteButton.setAttribute('aria-pressed', 'false');
+            muteButton.setAttribute('aria-label', 'Activer le son');
+            const muteIcon = muteButton.querySelector('i');
+            const muteText = muteButton.querySelector('.button-text');
+            if (muteIcon) muteIcon.className = 'fas fa-volume-up';
+            if (muteText) muteText.textContent = 'Son';
+        }
+
+        if (stopButton) {
+            stopButton.disabled = true;
+            stopButton.setAttribute('aria-label', 'Quitter la conversation (désactivé)');
+        }
+
+        // Annoncer la réinitialisation aux lecteurs d'écran
+        this.updateStatus('Interface réinitialisée. Veuillez entrer un nouvel identifiant.');
+    }
+
 }

@@ -15,35 +15,30 @@
 
         <div class="user-setup" role="form" aria-label="Configuration utilisateur">
             <label for="userId">Votre identifiant :</label>
-            <input type="text" id="userId" name="userId" placeholder="Entrez votre identifiant"
-                aria-label="Entrez votre identifiant" required>
-            <button id="setUserId" aria-label="Valider l'identifiant" class="control-button">
-                <i class="fas fa-check"></i>
-                <span class="button-text">Valider</span>
-            </button>
+            <div class="input-wrapper">
+                <input type="text" id="userId" name="userId" placeholder="Entrez votre identifiant"
+                    aria-label="Entrez votre identifiant" required>
+                <button id="setUserId" aria-label="Valider l'identifiant" data-tooltip="Valider l'identifiant"
+                    class="control-button">
+                    <i class="fas fa-check"></i>
+                </button>
+            </div>
         </div>
 
         <div class="controls" role="group" aria-label="Contrôles audio">
-            <button id="startButton" class="control-button" aria-label="Démarrer/Couper le micro" disabled>
+            <button id="startButton" class="control-button" aria-label="Démarrer la conversation"
+                data-tooltip="Démarrer la conversation" disabled>
                 <i class="fas fa-microphone"></i>
                 <span class="button-text">Démarrer</span>
             </button>
-            <button id="muteButton" class="control-button" aria-label="Couper/Activer le son" disabled>
+            <button id="muteButton" class="control-button" aria-label="Couper le son" data-tooltip="Couper le son"
+                disabled>
                 <i class="fas fa-volume-up"></i>
-                <span class="button-text">Son</span>
             </button>
-            <button id="stopButton" class="control-button" aria-label="Quitter la conversation" disabled>
+            <button id="stopButton" class="control-button" aria-label="Quitter la conversation"
+                data-tooltip="Quitter la conversation" disabled>
                 <i class="fas fa-sign-out-alt"></i>
-                <span class="button-text">Quitter</span>
             </button>
-        </div>
-
-        <div class="audio-meter" role="meter" aria-label="Niveau audio">
-            <div class="meter-label">Niveau audio</div>
-            <div class="meter-container">
-                <div id="meter-bar" class="meter-bar"></div>
-                <div id="meter-value" class="meter-value">-∞ dB</div>
-            </div>
         </div>
 
         <div id="status" role="status" aria-live="polite">

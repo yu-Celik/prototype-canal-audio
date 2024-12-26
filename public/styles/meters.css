@@ -11,6 +11,7 @@ body {
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
         }
 
         .user-setup {
@@ -39,14 +40,14 @@ body {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 20px;
+            padding: 0.5rem;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
             transition: all 0.3s ease;
-            min-width: 120px;
             justify-content: center;
+            position: relative;
         }
 
         .control-button i {
@@ -61,6 +62,7 @@ body {
         #startButton {
             background-color: #4CAF50;
             color: white;
+            padding: 0.5rem 1rem;
         }
 
         #startButton:hover:not(:disabled) {
@@ -314,6 +316,135 @@ body {
         @media (prefers-reduced-motion: reduce) {
             .control-button,
             .control-button i {
+                transition: none;
+            }
+        }
+
+        /* Styles pour l'interface miniaturisée */
+        .container.minimized {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 200px;
+            padding: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .container.minimized h1 {
+            font-size: 14px;
+            margin: 0 0 10px 0;
+        }
+
+        .container.minimized .user-setup {
+            display: none;
+        }
+
+        .container.minimized .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+            margin: 5px 0;
+        }
+
+        .container.minimized .control-button {
+            padding: 8px;
+            min-width: auto;
+            font-size: 12px;
+        }
+
+        .container.minimized .control-button i {
+            font-size: 14px;
+        }
+
+        .container.minimized .button-text {
+            display: none;
+        }
+
+        .container.minimized #status {
+            font-size: 12px;
+            margin-top: 10px;
+            padding: 5px;
+        }
+
+        .container.minimized .participants {
+            margin-top: 10px;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        .container.minimized .participants h2 {
+            font-size: 12px;
+            margin: 0 0 5px 0;
+        }
+
+        .container.minimized .participant-item {
+            padding: 4px;
+            margin-bottom: 4px;
+            font-size: 11px;
+        }
+
+        /* Bouton de minimisation */
+        #minimizeButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: inherit;
+        }
+
+        #minimizeButton i {
+            font-size: 16px;
+        }
+
+        /* Support du mode sombre pour l'interface miniaturisée */
+        @media (prefers-color-scheme: dark) {
+            .container.minimized {
+                background-color: #2d2d2d;
+            }
+        }
+
+        /* Styles pour les tooltips */
+        .control-button::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 5px 10px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            pointer-events: none;
+            margin-bottom: 5px;
+        }
+
+        .control-button:hover::before {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Support du mode sombre pour les tooltips */
+        @media (prefers-color-scheme: dark) {
+            .control-button::before {
+                background-color: rgba(255, 255, 255, 0.6);
+                color: black;
+            }
+        }
+
+        /* Désactiver les animations si l'utilisateur le préfère */
+        @media (prefers-reduced-motion: reduce) {
+            .control-button::before {
                 transition: none;
             }
         }

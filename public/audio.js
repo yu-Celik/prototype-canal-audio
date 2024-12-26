@@ -18,8 +18,8 @@ class AudioChannel {
         this.peerConnections = new Map();
         this.participants = new Set();
         this.localStream = null;
-        this.isMuted = false;
-        this.isAudioEnabled = true;
+        this.isMicMuted = false;
+        this.isAudioMuted = false;
         this.myUserId = null;
         this.isConfigured = false;
 
@@ -67,10 +67,6 @@ class AudioChannel {
         // Contrôles audio
         this.uiManager.elements.startButton.addEventListener('click', () => {
             this.toggleAudioChannel();
-        });
-
-        this.uiManager.elements.stopButton.addEventListener('click', () => {
-            this.stopAudioChannel();
         });
     }
 
@@ -123,38 +119,32 @@ class AudioChannel {
     startAudioMeter() {
         const updateMeter = () => {
             if (!this.analyser || !this.dataArray) return;
-
+    
             this.analyser.getByteFrequencyData(this.dataArray);
-
+    
             // Calcul de la moyenne des fréquences
             const average = this.dataArray.reduce((acc, val) => acc + val, 0) / this.dataArray.length;
-
-            // Conversion en décibels (approximatif)
-            const db = average === 0 ? -Infinity : 20 * Math.log10(average / 255);
-
-            // Mise à jour de l'interface
-            const meterBar = this.uiManager.elements.meterBar;
-            const meterValue = this.uiManager.elements.meterValue;
-
-            // Calcul de la largeur de la barre (0-100%)
-            const width = Math.max(0, Math.min(100, (average / 255) * 100));
-            meterBar.style.width = `${width}%`;
-
-            // Affichage de la valeur en dB
-            meterValue.textContent = db === -Infinity ? '-∞ dB' : `${db.toFixed(1)} dB`;
-
+    
+            // Normalisation entre 0 et 1
+            const normalizedLevel = average / 255;
+    
+            // Mise à jour du VU-mètre de l'utilisateur actuel
+            if (this.myUserId) {
+                this.uiManager.updateParticipantMeter(this.myUserId, normalizedLevel);
+            }
+    
             // Envoi du niveau audio au serveur
             if (this.webSocketManager.ws && this.webSocketManager.ws.readyState === WebSocket.OPEN) {
                 this.webSocketManager.ws.send(JSON.stringify({
                     type: 'audio-level',
-                    level: average / 255, // Normalisation entre 0 et 1
+                    level: normalizedLevel,
                 }));
             }
-
+    
             // Animation
             this.animationFrame = requestAnimationFrame(updateMeter);
         };
-
+    
         updateMeter();
     }
 
@@ -163,19 +153,18 @@ class AudioChannel {
             cancelAnimationFrame(this.animationFrame);
             this.animationFrame = null;
         }
-
+    
         if (this.audioContext) {
             this.audioContext.close();
             this.audioContext = null;
             this.analyser = null;
             this.dataArray = null;
         }
-
-        // Réinitialisation de l'affichage
-        const meterBar = this.uiManager.elements.meterBar;
-        const meterValue = this.uiManager.elements.meterValue;
-        if (meterBar) meterBar.style.width = '0%';
-        if (meterValue) meterValue.textContent = '-∞ dB';
+    
+        // Réinitialisation de l'affichage pour l'utilisateur actuel
+        if (this.myUserId) {
+            this.uiManager.updateParticipantMeter(this.myUserId, 0);
+        }
     }
 
     stopAudioChannel() {
@@ -197,25 +186,23 @@ class AudioChannel {
         if (this.webSocketManager) {
             this.webSocketManager.disconnect();
         }
-
-        // Mettre à jour l'interface
-        this.uiManager.elements.startButton.textContent = 'Démarrer';
-        this.uiManager.updateStatus('Canal audio arrêté');
     }
 
-    toggleMicrophone(isMuted) {
+    toggleMicrophone() {
+        console.log("toggleMicrophone", this.isMicMuted);
         if (this.localStream) {
             this.localStream.getAudioTracks().forEach(track => {
-                track.enabled = !isMuted;
+                track.enabled = this.isMicMuted;
             });
         }
     }
 
-    toggleAudio(isMuted) {
+    toggleAudio() {
+        console.log("toggleAudio", this.isAudioMuted);
         // Récupérer tous les éléments audio distants
         const remoteAudios = document.querySelectorAll('.remote-audio audio');
         remoteAudios.forEach(audio => {
-            audio.muted = isMuted;
+            audio.muted = this.isAudioMuted;
         });
     }
 }
