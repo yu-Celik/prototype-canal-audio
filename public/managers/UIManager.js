@@ -174,8 +174,6 @@ export class UIManager {
             startButton.setAttribute('aria-label', toggle ? 'Micro coupé' : 'Micro actif');
         }
 
-        this.elements.startButton.style.padding = '0.25rem 0.5rem';
-
         this.updateStatus(toggle ? 'Micro désactivé' : 'Micro activé');
     }
 
@@ -257,16 +255,11 @@ export class UIManager {
             const startIcon = startButton.querySelector('i');
             const startText = startButton.querySelector('.button-text');
 
-            console.log('startIcon', startIcon);
-            console.log('startText', startText);
-
-
             if (startIcon) startIcon.className = 'fas fa-microphone';
             if (startText) startText.textContent = 'Démarrer';
         }
 
         if (muteButton) {
-            muteButton.disabled = true;
             muteButton.classList.remove('muted');
             muteButton.setAttribute('aria-pressed', 'false');
             muteButton.setAttribute('aria-label', 'Activer le son');
@@ -276,10 +269,6 @@ export class UIManager {
             if (muteText) muteText.textContent = 'Son';
         }
 
-        if (stopButton) {
-            stopButton.disabled = true;
-            stopButton.setAttribute('aria-label', 'Quitter la conversation (désactivé)');
-        }
     }
 
     toggleControlsVisibility(show = true) {
@@ -290,6 +279,7 @@ export class UIManager {
         if (startText) {
             startText.style.display = show ? 'none' : 'block';
         }
+        startButton.style.padding = show ? '0.25rem 0.5rem' : '0.25rem 1rem';
 
         // Gestion des autres boutons et du status
         if (stopButton) stopButton.style.display = show ? 'block' : 'none';
