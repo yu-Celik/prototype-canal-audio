@@ -52,7 +52,7 @@ class AudioServer {
         const data = JSON.parse(message);
 
         switch (data.type) {
-            case 'set-user-id':
+            case 'set-user-id':                
                 this.handleSetUserId(ws, data.userId);
                 break;
 

@@ -38,6 +38,7 @@ class AudioChannel {
 
         // Initialisation des contrôles
         this.initializeControls();
+        this.autoConnect();
     }
 
     setupUserId() {
@@ -76,6 +77,7 @@ class AudioChannel {
                 this.localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 this.uiManager.updateStatus('Connecté');
 
+
                 // Configuration de l'analyseur audio
                 this.setupAudioAnalyser();
 
@@ -87,6 +89,7 @@ class AudioChannel {
                 });
 
 
+                console.log('re');
 
                 // Notification au serveur que nous sommes prêts
                 this.webSocketManager.ws.send(JSON.stringify({
@@ -95,6 +98,7 @@ class AudioChannel {
 
                 // Afficher les contrôles
                 this.uiManager.toggleControlsVisibility(true);
+
                 this.startAudioMeter();
             } catch (error) {
                 console.error('Erreur lors de l\'accès au microphone:', error);
@@ -123,20 +127,20 @@ class AudioChannel {
     startAudioMeter() {
         const updateMeter = () => {
             if (!this.analyser || !this.dataArray) return;
-    
+
             this.analyser.getByteFrequencyData(this.dataArray);
-    
+
             // Calcul de la moyenne des fréquences
             const average = this.dataArray.reduce((acc, val) => acc + val, 0) / this.dataArray.length;
-    
+
             // Normalisation entre 0 et 1
             const normalizedLevel = average / 255;
-    
+
             // Mise à jour du VU-mètre de l'utilisateur actuel
             if (this.myUserId) {
                 this.uiManager.updateParticipantMeter(this.myUserId, normalizedLevel);
             }
-    
+
             // Envoi du niveau audio au serveur
             if (this.webSocketManager.ws && this.webSocketManager.ws.readyState === WebSocket.OPEN) {
                 this.webSocketManager.ws.send(JSON.stringify({
@@ -144,11 +148,11 @@ class AudioChannel {
                     level: normalizedLevel,
                 }));
             }
-    
+
             // Animation
             this.animationFrame = requestAnimationFrame(updateMeter);
         };
-    
+
         updateMeter();
     }
 
@@ -157,14 +161,14 @@ class AudioChannel {
             cancelAnimationFrame(this.animationFrame);
             this.animationFrame = null;
         }
-    
+
         if (this.audioContext) {
             this.audioContext.close();
             this.audioContext = null;
             this.analyser = null;
             this.dataArray = null;
         }
-    
+
         // Réinitialisation de l'affichage pour l'utilisateur actuel
         if (this.myUserId) {
             this.uiManager.updateParticipantMeter(this.myUserId, 0);
@@ -207,6 +211,36 @@ class AudioChannel {
         remoteAudios.forEach(audio => {
             audio.muted = this.isAudioMuted;
         });
+    }
+
+    saveUserCredentials(userId) {
+        localStorage.setItem('audioChannelUserId', userId);
+    }
+
+    getSavedUserId() {
+        return localStorage.getItem('audioChannelUserId');
+    }
+
+    clearSavedCredentials() {
+        localStorage.removeItem('audioChannelUserId');
+    }
+
+    async autoConnect() {
+        const savedUserId = this.getSavedUserId();
+        if (savedUserId) {
+            // Remplir et désactiver le champ userId
+            const userIdInput = this.uiManager.elements.userId;
+            userIdInput.value = savedUserId;
+            userIdInput.disabled = true;
+            this.uiManager.elements.setUserId.disabled = true;
+
+            // Configurer l'utilisateur
+            this.setupUserId();
+
+            setTimeout(async () => {
+                await this.toggleAudioChannel();
+            }, 500);
+        }
     }
 }
 

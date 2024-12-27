@@ -109,6 +109,7 @@ export class UIManager {
 
         // Mise à jour utilisateur actuel
         if (this.audioChannel.myUserId) {
+            this.audioChannel.saveUserCredentials(this.audioChannel.myUserId);
             this.updateOrCreateParticipant(this.audioChannel.myUserId, true);
             currentParticipants.delete(this.sanitizeId(this.audioChannel.myUserId));
         }
@@ -222,6 +223,9 @@ export class UIManager {
         this.toggleControlsVisibility(false);
 
         this.resetControls();
+
+        // Réinitialiser les identifiants utilisateur
+        this.audioChannel.clearSavedCredentials();
 
         // Réinitialiser les connexions
         this.audioChannel.stopAudioChannel();
