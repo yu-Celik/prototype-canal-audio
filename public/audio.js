@@ -74,7 +74,7 @@ class AudioChannel {
         if (!this.localStream) {
             try {
                 this.localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                this.uiManager.updateStatus('Canal audio activé');
+                this.uiManager.updateStatus('Connecté');
 
                 // Configuration de l'analyseur audio
                 this.setupAudioAnalyser();
@@ -86,15 +86,19 @@ class AudioChannel {
                     });
                 });
 
+
+
                 // Notification au serveur que nous sommes prêts
                 this.webSocketManager.ws.send(JSON.stringify({
                     type: 'participant-pret'
                 }));
 
+                // Afficher les contrôles
+                this.uiManager.toggleControlsVisibility(true);
                 this.startAudioMeter();
             } catch (error) {
                 console.error('Erreur lors de l\'accès au microphone:', error);
-                this.uiManager.updateStatus('Erreur: Impossible d\'accéder au microphone');
+                this.uiManager.updateStatus('Erreur de connexion');
                 return;
             }
         }
@@ -189,7 +193,6 @@ class AudioChannel {
     }
 
     toggleMicrophone() {
-        console.log("toggleMicrophone", this.isMicMuted);
         if (this.localStream) {
             this.localStream.getAudioTracks().forEach(track => {
                 track.enabled = this.isMicMuted;

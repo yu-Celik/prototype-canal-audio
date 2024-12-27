@@ -43,7 +43,7 @@ export class WebSocketManager {
                     break;
                 case 'id-confirmed':
                     console.trace('je suis id confirmed');
-                    this.uiManager.updateStatus('ID confirmé. Prêt à communiquer.');
+                    this.uiManager.updateStatus('Connecté');
                     break;
                 case 'liste-participants':
                     console.trace('je suis liste participants');

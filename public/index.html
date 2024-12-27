@@ -11,8 +11,6 @@
 
 <body>
     <div class="container" role="main">
-        <h1>Canal Audio WebRTC</h1>
-
         <div class="user-setup" role="form" aria-label="Configuration utilisateur">
             <label for="userId">Votre identifiant :</label>
             <div class="input-wrapper">
@@ -31,26 +29,21 @@
                 <i class="fas fa-microphone"></i>
                 <span class="button-text">Démarrer</span>
             </button>
-            <button id="muteButton" class="control-button" aria-label="Couper le son" data-tooltip="Couper le son"
-                disabled>
+            <button id="muteButton" class="control-button" aria-label="Couper le son" data-tooltip="Couper le son">
                 <i class="fas fa-volume-up"></i>
             </button>
             <button id="stopButton" class="control-button" aria-label="Quitter la conversation"
-                data-tooltip="Quitter la conversation" disabled>
+                data-tooltip="Quitter la conversation">
                 <i class="fas fa-sign-out-alt"></i>
             </button>
+            <div id="status" role="status" aria-live="polite">
+            </div>
         </div>
 
-        <div id="status" role="status" aria-live="polite">
-            État: En attente de configuration...
-        </div>
 
-        <div class="participants" role="region" aria-label="Liste des participants">
-            <h2>Participants connectés</h2>
-            <ul id="participantsList" aria-live="polite" class="participants-list">
-                <!-- Les participants seront ajoutés dynamiquement ici -->
-            </ul>
-        </div>
+        <ul id="participantsList" aria-live="polite" class="participants-list">
+            <!-- Les participants seront ajoutés dynamiquement ici -->
+        </ul>
     </div>
 
     <script type="module" src="audio.js"></script>

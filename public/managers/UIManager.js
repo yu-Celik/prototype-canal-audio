@@ -49,8 +49,6 @@ export class UIManager {
 
         // Activer les boutons de contrôle
         this.elements.startButton.disabled = false;
-        this.elements.muteButton.disabled = false;
-        this.elements.stopButton.disabled = false;
 
         return userId;
     }
@@ -76,7 +74,7 @@ export class UIManager {
         if (confirm('Voulez-vous vraiment quitter la conversation ?')) {
             // Supprimer uniquement l'utilisateur actuel de la liste des participants
             this.resetInterface();
-            this.updateStatus('Vous avez quitté la conversation');
+            this.updateStatus('Déconnecté');
         }
     }
 
@@ -172,12 +170,13 @@ export class UIManager {
             iconElement.className = toggle ? 'fas fa-microphone-slash' : 'fas fa-microphone';
         }
         if (dataTooltip) {
-            console.log("dataTooltip", dataTooltip);
             startButton.setAttribute('data-tooltip', toggle ? 'Micro coupé' : 'Micro actif');
             startButton.setAttribute('aria-label', toggle ? 'Micro coupé' : 'Micro actif');
         }
 
-        this.updateStatus(toggle ? 'Microphone désactivé' : 'Microphone activé');
+        this.elements.startButton.style.padding = '0.25rem 0.5rem';
+
+        this.updateStatus(toggle ? 'Micro désactivé' : 'Micro activé');
     }
 
     updateParticipantMeter(userId, audioLevel) {
@@ -207,7 +206,7 @@ export class UIManager {
 
     updateStatus(message) {
         if (this.elements.status) {
-            this.elements.status.textContent = `État: ${message}`;
+            this.elements.status.textContent = `${message}`;
         }
     }
 
@@ -220,6 +219,9 @@ export class UIManager {
         if (this.audioChannel.myUserId) {
             this.deleteParticipantFromList(this.audioChannel.myUserId);
         }
+
+        // Masquer les contrôles supplémentaires
+        this.toggleControlsVisibility(false);
 
         this.resetControls();
 
@@ -278,9 +280,21 @@ export class UIManager {
             stopButton.disabled = true;
             stopButton.setAttribute('aria-label', 'Quitter la conversation (désactivé)');
         }
+    }
 
-        // Annoncer la réinitialisation aux lecteurs d'écran
-        this.updateStatus('Interface réinitialisée. Veuillez entrer un nouvel identifiant.');
+    toggleControlsVisibility(show = true) {
+        const { startButton, stopButton, muteButton, status } = this.elements;
+        
+        // Gestion du texte du bouton start
+        const startText = startButton?.querySelector('.button-text');
+        if (startText) {
+            startText.style.display = show ? 'none' : 'block';
+        }
+
+        // Gestion des autres boutons et du status
+        if (stopButton) stopButton.style.display = show ? 'block' : 'none';
+        if (muteButton) muteButton.style.display = show ? 'block' : 'none';
+        if (status) status.style.display = show ? 'block' : 'none';
     }
 
 }

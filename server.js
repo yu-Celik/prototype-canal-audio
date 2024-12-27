@@ -7,33 +7,33 @@ class AudioServer {
     constructor() {
         // Initialiser Express
         this.app = express();
-        
+
         // Servir les fichiers statiques
         this.app.use(express.static(path.join(__dirname, 'public')));
-        
+
         // Créer le serveur HTTP
         this.server = http.createServer(this.app);
-        
+
         // Initialiser le serveur WebSocket avec le serveur HTTP
         this.wss = new WebSocket.Server({ server: this.server });
-        
+
         // Configuration des collections
         this.clients = new Map();
         this.userIds = new Map();
         this.activeParticipants = new Set();
         this.pendingConnections = new Set();
-        
+
         // Route par défaut
         this.app.get('/', (req, res) => {
             res.sendFile(path.join(__dirname, 'public', 'index.html'));
         });
-        
+
         // Démarrer le serveur
         const port = process.env.PORT || 3000;
         this.server.listen(port, () => {
             console.log(`Serveur démarré sur le port ${port}`);
         });
-        
+
         // Gérer les connexions WebSocket
         this.wss.on('connection', this.handleConnection.bind(this));
     }
@@ -66,6 +66,15 @@ class AudioServer {
                         type: 'nouveau-participant',
                         userId: fromUserId
                     });
+
+                    // Envoyer la liste des participants actifs
+                    const participantsList = Array.from(this.activeParticipants)
+                        .map(client => this.userIds.get(client));
+
+                    ws.send(JSON.stringify({
+                        type: 'liste-participants',
+                        participants: participantsList
+                    }));
                 }
                 break;
 
@@ -93,9 +102,6 @@ class AudioServer {
     }
 
     handleSetUserId(ws, userId) {
-        console.log('handleSetUserId', userId);
-        console.log('this.userIds', this.userIds);
-        
         // Vérifier si l'ID est déjà utilisé
         for (let [, id] of this.userIds) {
             if (id === userId) {
@@ -113,15 +119,6 @@ class AudioServer {
 
         ws.send(JSON.stringify({
             type: 'id-confirmed'
-        }));
-
-        // Envoyer la liste des participants actifs
-        const participantsList = Array.from(this.activeParticipants)
-            .map(client => this.userIds.get(client));
-
-        ws.send(JSON.stringify({
-            type: 'liste-participants',
-            participants: participantsList
         }));
 
         console.log(`Utilisateur configuré avec ID: ${userId}`);
