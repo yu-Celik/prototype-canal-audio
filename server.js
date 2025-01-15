@@ -49,7 +49,8 @@ class AudioServer {
         ws.on('error', (error) => this.onError(ws, error));
     }
 
-           const data = JSON.parse(message);
+    onMessage(ws, message) {
+        const data = JSON.parse(message);
 
         switch (data.type) {
             case 'set-user-id':                
