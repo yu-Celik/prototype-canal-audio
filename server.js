@@ -22,7 +22,6 @@ class AudioServer {
         this.userIds = new Map();
         this.activeParticipants = new Set();
         this.pendingConnections = new Set();
-        this.allParticipants = new Set();
 
 
         // Route par défaut
@@ -50,8 +49,7 @@ class AudioServer {
         ws.on('error', (error) => this.onError(ws, error));
     }
 
-    onMessage(ws, message) {
-        const data = JSON.parse(message);
+           const data = JSON.parse(message);
 
         switch (data.type) {
             case 'set-user-id':                
@@ -61,7 +59,7 @@ class AudioServer {
             case 'participant-pret':
                 if (this.userIds.has(ws)) {
                     const fromUserId = this.userIds.get(ws);
-                    this.activeParticipants.add(ws);
+                    this.activeParticipants.add(fromUserId); // Ajouter à la liste des participants actifs
 
                     // Notification aux autres clients
                     this.broadcast(ws, {
@@ -69,25 +67,8 @@ class AudioServer {
                         userId: fromUserId
                     });
 
-                    // Envoyer la liste des participants actifs
-                    const participantsList = Array.from(this.activeParticipants)
-                        .map(client => this.userIds.get(client));
-
-                    ws.send(JSON.stringify({
-                        type: 'liste-participants',
-                        participants: participantsList
-                    }));
-                }
-                break;
-
-            case 'audio-level':
-                if (this.userIds.has(ws)) {
-                    const fromUserId = this.userIds.get(ws);
-                    this.broadcast(ws, {
-                        type: 'audio-level',
-                        userId: fromUserId,
-                        level: data.level
-                    });
+                    // Envoyer la liste des participants actifs à tous
+                    this.broadcastParticipantsList();
                 }
                 break;
 
@@ -118,23 +99,24 @@ class AudioServer {
         this.pendingConnections.delete(ws);
         this.clients.set(ws, true);
         this.userIds.set(ws, userId);
-        this.allParticipants.add(userId);
 
         ws.send(JSON.stringify({
             type: 'id-confirmed'
         }));
 
         // Envoyer la liste des participants à tous les clients
-        this.broadcastParticipantsList();
+        ws.send(JSON.stringify({
+            type: 'liste-participants',
+            participants: Array.from(this.activeParticipants)
+        }));
 
         console.log(`Utilisateur configuré avec ID: ${userId}`);
     }
 
     broadcastParticipantsList() {
-        const participantsList = Array.from(this.allParticipants);
         const message = {
             type: 'liste-participants',
-            participants: participantsList
+            participants: Array.from(this.activeParticipants)
         };
         
         this.clients.forEach((_, client) => {
@@ -143,10 +125,13 @@ class AudioServer {
             }
         });
     }
-    
-    onClose(ws) {
+
+ onClose(ws) {
         if (this.userIds.has(ws)) {
             const userId = this.userIds.get(ws);
+
+            // Retirer de la liste des participants actifs
+            this.activeParticipants.delete(userId);
 
             this.broadcast(ws, {
                 type: 'participant-deconnecte',
@@ -154,13 +139,11 @@ class AudioServer {
             });
 
             this.clients.delete(ws);
-            this.activeParticipants.delete(ws);
             this.userIds.delete(ws);
-            this.allParticipants.delete(userId);
-
+            
+            // Diffuser la mise à jour de la liste
             this.broadcastParticipantsList();
-
-
+            
             console.log(`Connexion ${userId} fermée`);
         } else {
             this.pendingConnections.delete(ws);
