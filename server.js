@@ -22,6 +22,8 @@ class AudioServer {
         this.userIds = new Map();
         this.activeParticipants = new Set();
         this.pendingConnections = new Set();
+        this.allParticipants = new Set();
+
 
         // Route par défaut
         this.app.get('/', (req, res) => {
@@ -116,14 +118,32 @@ class AudioServer {
         this.pendingConnections.delete(ws);
         this.clients.set(ws, true);
         this.userIds.set(ws, userId);
+        this.allParticipants.add(userId);
 
         ws.send(JSON.stringify({
             type: 'id-confirmed'
         }));
 
+        // Envoyer la liste des participants à tous les clients
+        this.broadcastParticipantsList();
+
         console.log(`Utilisateur configuré avec ID: ${userId}`);
     }
 
+    broadcastParticipantsList() {
+        const participantsList = Array.from(this.allParticipants);
+        const message = {
+            type: 'liste-participants',
+            participants: participantsList
+        };
+        
+        this.clients.forEach((_, client) => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify(message));
+            }
+        });
+    }
+    
     onClose(ws) {
         if (this.userIds.has(ws)) {
             const userId = this.userIds.get(ws);
@@ -136,6 +156,11 @@ class AudioServer {
             this.clients.delete(ws);
             this.activeParticipants.delete(ws);
             this.userIds.delete(ws);
+            this.allParticipants.delete(userId);
+
+            this.broadcastParticipantsList();
+
+
             console.log(`Connexion ${userId} fermée`);
         } else {
             this.pendingConnections.delete(ws);
